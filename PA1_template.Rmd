@@ -1,25 +1,97 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
+title: "Reproducible-Research"
+author: "prem"
+date: "July 21, 2017"
+output: html_document
 ---
 
+#1.Loading and preprocessing the data.
+The below mentioed code is used to load the data in to an object.
+```{r,echo=TRUE,message=FALSE,warning=FALSE}
+act <- read.csv("C:/Users/premsanth/Desktop/Data science coursera/R_programming/repdata_data_activity/activity.csv")
+library(lubridate)
+act$date <- ymd(act$date) ##This line transform the data type of the date field.
+```
+#2.What is mean total number of steps taken per day?
+```{r,echo=TRUE,message=FALSE,warning=FALSE}
+library(dplyr)
+Total_steps_perday <- tapply(X=act$steps,INDEX = act$date,FUN=sum,na.rm=TRUE)
+Total_steps_perday_mat<- data.frame(Date = rownames(Total_steps_perday),Total_steps_perday,row.names=NULL) # To convert the array in to dataframe.
+```
+### The sample of total number of steps taken per day is (only head of the table is printed below)
+```{r,echo=TRUE,message=FALSE,warning=FALSE}
+print(head(Total_steps_perday_mat))
+```
+### A histogram of the total number of steps taken each day
 
-## Loading and preprocessing the data
+```{r,echo=TRUE,message=FALSE,warning=FALSE}
+hist(Total_steps_perday)
+```
+
+###The mean and median of the total number of steps taken per day.
+```{r,echo=TRUE,message=FALSE,warning=FALSE}
+(summary(Total_steps_perday))[c("Mean","Median")]
+```
+
+#3.The average daily activity pattern.
+###Time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days.
+```{r,echo=TRUE,message=FALSE,warning=FALSE}
+library(ggplot2)
+library(reshape2)
+Average_steps_Interval <- tapply(X=act$steps,INDEX = act$interval,FUN=mean,na.rm=TRUE)
+ggplot(melt(Average_steps_Interval),aes(Var1,value))+geom_line()+geom_point()+scale_x_discrete(limits=seq(0,2355,by=150))+labs(x= "5 minitues interval",y="number of steps")
+```
+
+
+#### 5-minute interval contains the maximum number of steps
+
+The 5-minute interval contains the maximum number of steps is `r names(Average_steps_Interval[grep(max(Average_steps_Interval),Average_steps_Interval)])`
+
+#4.Imputing missing values.
+Total number of missing values in the dataset is `length(which(!complete.cases(act)))`
+### Filling in all of the missing values in the dataset.
+The code for Filling in all of the missing values in the dataset.
+```{r,echo=TRUE,message=FALSE,warning=FALSE}
+imput_act <- act
+imput_act[which(is.na(imput_act$steps)),"steps"] <- as.vector(Average_steps_Interval[(as.character(imput_act[which(is.na(imput_act$steps)),"interval"]))])
+
+```
+
+The head of new dataset that is equal to the original dataset but with the missing data filled in is
+```{r,echo=TRUE,message=FALSE,warning=FALSE}
+head(imput_act)
+```
+
+##For the new dataset.
+
+###total daily number of steps
+```{r,echo=TRUE,message=FALSE,warning=FALSE}
+Total_steps_perday_new <- tapply(X=imput_act$steps,INDEX = imput_act$date,FUN=sum,na.rm=TRUE)
+```
+### Mean and median
+```{r,echo=TRUE,message=FALSE,warning=FALSE}
+(summary(Total_steps_perday_new))[c("Mean","Median")]
+```
+
+### histogram
+```{r,echo=TRUE,message=FALSE,warning=FALSE}
+hist(Total_steps_perday_new)
+```
+
+#Activity patterns between weekdays and weekends.
+###The code for creating a new factor variable in the dataset.
+```{r,echo=TRUE,message=FALSE,warning=FALSE}
+imput_act$days <- factor(wday(imput_act$date))
+levels(imput_act$days) <- list(week_day=c("2","3","4","5","6"), week_end=c("1","7"))
+Average_steps_Interval_weekday <- tapply(X=act$steps,INDEX = list(imput_act$days,imput_act$interval),FUN=mean,na.rm=TRUE)
+```
+
+##plot containing a time series plot for weekday and week end.
+```{r,echo=TRUE,message=FALSE,warning=FALSE}
+ggplot(melt(Average_steps_Interval_weekday),aes(x=Var2,y=value))+facet_grid(Var1~.)+geom_line()+theme_light()+labs(x= "5 minitues interval",y="number of steps")
+```
+
+#End of the document.
 
 
 
-## What is mean total number of steps taken per day?
-
-
-
-## What is the average daily activity pattern?
-
-
-
-## Imputing missing values
-
-
-
-## Are there differences in activity patterns between weekdays and weekends?
