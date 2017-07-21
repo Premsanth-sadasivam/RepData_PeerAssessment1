@@ -12,16 +12,21 @@ act <- read.csv("C:/Users/premsanth/Desktop/Data science coursera/R_programming/
 library(lubridate)
 act$date <- ymd(act$date) ##This line transform the data type of the date field.
 ```
+
 # 2.What is mean total number of steps taken per day?
+
 ```{r,echo=TRUE,message=FALSE,warning=FALSE}
 library(dplyr)
 Total_steps_perday <- tapply(X=act$steps,INDEX = act$date,FUN=sum,na.rm=TRUE)
 Total_steps_perday_mat<- data.frame(Date = rownames(Total_steps_perday),Total_steps_perday,row.names=NULL) # To convert the array in to dataframe.
 ```
+
 ### The sample of total number of steps taken per day is (only head of the table is printed below)
+
 ```{r,echo=TRUE,message=FALSE,warning=FALSE}
 print(head(Total_steps_perday_mat))
 ```
+
 ### A histogram of the total number of steps taken each day
 
 ```{r,echo=TRUE,message=FALSE,warning=FALSE}
@@ -68,18 +73,22 @@ head(imput_act)
 ```{r,echo=TRUE,message=FALSE,warning=FALSE}
 Total_steps_perday_new <- tapply(X=imput_act$steps,INDEX = imput_act$date,FUN=sum,na.rm=TRUE)
 ```
+
 ### Mean and median
+
 ```{r,echo=TRUE,message=FALSE,warning=FALSE}
 (summary(Total_steps_perday_new))[c("Mean","Median")]
 ```
 
 ### histogram
+
 ```{r,echo=TRUE,message=FALSE,warning=FALSE}
 hist(Total_steps_perday_new)
 ```
 
 # Activity patterns between weekdays and weekends.
 ### The code for creating a new factor variable in the dataset.
+
 ```{r,echo=TRUE,message=FALSE,warning=FALSE}
 imput_act$days <- factor(wday(imput_act$date))
 levels(imput_act$days) <- list(week_day=c("2","3","4","5","6"), week_end=c("1","7"))
@@ -87,6 +96,7 @@ Average_steps_Interval_weekday <- tapply(X=act$steps,INDEX = list(imput_act$days
 ```
 
 ## plot containing a time series plot for weekday and week end.
+
 ```{r,echo=TRUE,message=FALSE,warning=FALSE}
 ggplot(melt(Average_steps_Interval_weekday),aes(x=Var2,y=value))+facet_grid(Var1~.)+geom_line()+theme_light()+labs(x= "5 minitues interval",y="number of steps")
 ```
